@@ -1,5 +1,6 @@
 require "bundler/setup"
 require "number_to_word"
+require 'pry'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
