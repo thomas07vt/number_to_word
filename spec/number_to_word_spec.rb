@@ -43,11 +43,12 @@ RSpec.describe NumberToWord do
       expect(subject.word).to be_a(String)
     end
 
-    # 0 - 9 are base words and 10-15 (14 is normal :) ) so lets tests those
-    # explicitly. I usually don't like to have more than one assertion per 'it'
-    # block, but if I did that, then I would be writing a lot more text that
-    # would probably make this test file harder to read
-    context '0-15' do
+    # 0 - 19 are base words that aren't easily tested programatically
+    # so lets tests those explicitly. I usually don't like to have more
+    # than one assertion per 'it' block, but if I did that, then I would
+    # be writing a lot more text that would probably make this test file
+    # harder to read
+    context '0-19' do
       it 'returns the correct word for the given integer' do
         expect(NumberToWord.new(0).word).to eq('zero')
         expect(NumberToWord.new(1).word).to eq('one')
@@ -65,26 +66,10 @@ RSpec.describe NumberToWord do
         expect(NumberToWord.new(13).word).to eq('thirteen')
         expect(NumberToWord.new(14).word).to eq('fourteen')
         expect(NumberToWord.new(15).word).to eq('fifteen')
-      end
-    end
-
-    # These teens can be programmatically tested, so we can still have full test
-    # coverage, assuming that the base number conversion is correct. We just
-    # check that the pattern is matched:
-    #
-    # e.g. 16
-    #   base = 6 #=> 'six',
-    #   unit = 'teen'
-    #
-    #   result = 'sixteen'
-    #
-    context '16-19' do
-      it 'returns teens correctly' do
-        (16..19).each do |number|
-          base = number - 10
-          expect(NumberToWord.new(number).word).to \
-            eq("#{NumberToWord.new(base).word}teen")
-        end
+        expect(NumberToWord.new(16).word).to eq('sixteen')
+        expect(NumberToWord.new(17).word).to eq('seventeen')
+        expect(NumberToWord.new(18).word).to eq('eighteen')
+        expect(NumberToWord.new(19).word).to eq('nineteen')
       end
     end
 
