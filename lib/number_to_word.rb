@@ -72,7 +72,7 @@ class NumberToWord
       NUMBER_TABLE[number]
     when 20..99
       tens, mod = number.divmod(10)
-      "#{TENS_TABLE[number / 10]}#{'-' + NUMBER_TABLE[mod] unless mod == 0}"
+      "#{TENS_TABLE[tens]}#{'-' + NUMBER_TABLE[mod] unless mod == 0}"
     else
       solve_large_number(number)
     end
