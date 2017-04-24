@@ -2,13 +2,6 @@ require "number_to_word/version"
 
 class NumberToWord
   attr_reader :number
-  #UNIT_TABLE = {
-    #1000000000 => 'billion',
-    #1000000 => 'million',
-    #1000 => 'thousand',
-    #100 => 'hundred'
-  #}
-
   UNIT_TABLE = [
     [1000000000, 'billion'],
     [1000000, 'million'],
@@ -49,6 +42,46 @@ class NumberToWord
     1 => 'one',
   }
 
+  # This will memoize all the solutions so that the actual lookup should be
+  # very fast, at the cost of the first accessor
+  #
+  # @private
+  #
+  # @return [Hash] All the solutions
+  def self.solutions
+    @solutions ||= solve_for_most
+  end
+
+  # I initially tried this up to 1 million, but it hosed my computer.
+  # So I am backing off to just solve for 100,000
+  # @private
+  def self.solve_for_most
+    solutions = {}
+    (0..100_000).each do |number|
+      solutions[number] = num_to_word(number)
+    end
+    solutions
+  end
+
+  # Taking the same logic to solve the number that was used on the instance
+  #
+  # @private
+  def self.num_to_word(number)
+    case number
+    when 0..19
+      NUMBER_TABLE[number]
+    when 20..99
+      tens, mod = number.divmod(10)
+      "#{TENS_TABLE[number / 10]}#{'-' + NUMBER_TABLE[mod] unless mod == 0}"
+    else
+      UNIT_TABLE.each do |unit_num, unit_name|
+        div, mod = number.divmod(unit_num)
+        if div > 0
+          return "#{num_to_word(div)} #{unit_name}#{' ' + num_to_word(mod) unless mod == 0}"
+        end
+      end
+    end
+  end
 
   # Creates a NumberToWord instance
   #
@@ -71,26 +104,7 @@ class NumberToWord
   def word
     return 'zero' if @number == 0
 
-    num_to_word(@number)
-  end
-
-  private
-
-  def num_to_word(number)
-    case number
-    when 0..19
-      NUMBER_TABLE[number]
-    when 20..99
-      tens, mod = number.divmod(10)
-      "#{TENS_TABLE[number / 10]}#{'-' + NUMBER_TABLE[mod] unless mod == 0}"
-    else
-      UNIT_TABLE.each do |unit_num, unit_name|
-        div, mod = number.divmod(unit_num)
-        if div > 0
-          return "#{num_to_word(div)} #{unit_name}#{' ' + num_to_word(mod) unless mod == 0}"
-        end
-      end
-    end
+    NumberToWord.solutions[@number] || NumberToWord.num_to_word(@number)
   end
 end
 
