@@ -58,7 +58,7 @@ class NumberToWord
   def self.solve_for_most
     solutions = {}
     (0..100_000).each do |number|
-      solutions[number] = num_to_word(number)
+      solutions[number] = solve_any_number(number)
     end
     solutions
   end
@@ -66,7 +66,7 @@ class NumberToWord
   # Taking the same logic to solve the number that was used on the instance
   #
   # @private
-  def self.num_to_word(number)
+  def self.solve_any_number(number)
     case number
     when 0..19
       NUMBER_TABLE[number]
@@ -77,8 +77,27 @@ class NumberToWord
       UNIT_TABLE.each do |unit_num, unit_name|
         div, mod = number.divmod(unit_num)
         if div > 0
-          return "#{num_to_word(div)} #{unit_name}#{' ' + num_to_word(mod) unless mod == 0}"
+          return "#{solve_any_number(div)} #{unit_name}#{' ' + solve_any_number(mod) unless mod == 0}"
         end
+      end
+    end
+  end
+
+  # We can use this to lookup pre-solved solutions first, before doing the 
+  # solve_large_number call again
+  #
+  # @private
+  def self.solve(number)
+    solutions[number] || solve_large_number(number)
+  end
+
+  # We can remove the case statement if we know we are only dealing with large
+  # numbers
+  def self.solve_large_number(number)
+    UNIT_TABLE.each do |unit_num, unit_name|
+      div, mod = number.divmod(unit_num)
+      if div > 0
+        return "#{solve(div)} #{unit_name}#{' ' + solve(mod) unless mod == 0}"
       end
     end
   end
@@ -104,7 +123,7 @@ class NumberToWord
   def word
     return 'zero' if @number == 0
 
-    NumberToWord.solutions[@number] || NumberToWord.num_to_word(@number)
+    NumberToWord.solutions[@number] || NumberToWord.solve_large_number(@number)
   end
 end
 
