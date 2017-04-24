@@ -2,6 +2,7 @@ require "number_to_word/version"
 
 class NumberToWord
   attr_reader :number
+
   UNIT_TABLE = [
     [1000000000, 'billion'],
     [1000000, 'million'],
@@ -42,61 +43,6 @@ class NumberToWord
     1 => 'one',
   }
 
-  # This will memoize all the solutions so that the actual lookup should be
-  # very fast, at the cost of the first accessor
-  #
-  # @private
-  #
-  # @return [Hash] All the solutions
-  def self.solutions
-    @solutions ||= populate_cache
-  end
-
-  # I initially tried this up to 1 million, but it hosed my computer.
-  # So I am backing off to just solve for 100,000
-  # @private
-  def self.populate_cache
-    @solutions = {}
-    (0..100_000).each do |number|
-      @solutions[number] = solve_any_number(number)
-    end
-    @solutions
-  end
-
-  # Taking the same logic to solve the number that was used on the instance
-  #
-  # @private
-  def self.solve_any_number(number)
-    case number
-    when 0..19
-      NUMBER_TABLE[number]
-    when 20..99
-      tens, mod = number.divmod(10)
-      "#{TENS_TABLE[tens]}#{'-' + NUMBER_TABLE[mod] unless mod == 0}"
-    else
-      solve_large_number(number)
-    end
-  end
-
-  # We can use this to lookup pre-solved solutions first, before doing the 
-  # solve_large_number call again
-  #
-  # @private
-  def self.solve_with_cache(number)
-    solutions[number] || solve_large_number(number)
-  end
-
-  # We can remove the case statement if we know we are only dealing with large
-  # numbers
-  def self.solve_large_number(number)
-    UNIT_TABLE.each do |unit_num, unit_name|
-      div, mod = number.divmod(unit_num)
-      if div > 0
-        return "#{solve_with_cache(div)} #{unit_name}#{' ' + solve_with_cache(mod) unless mod == 0}"
-      end
-    end
-  end
-
   # Creates a NumberToWord instance
   #
   # @param [Integer] (Required) The integer that will be used to generate the word. Must be positive
@@ -119,6 +65,72 @@ class NumberToWord
     return 'zero' if @number == 0
 
     NumberToWord.solutions[@number] || NumberToWord.solve_large_number(@number)
+  end
+
+  # This will memoize all the solutions so that the actual lookup should be
+  # very fast, at the cost of the first accessor
+  #
+  # @private
+  #
+  # @return [Hash] All the solutions
+  def self.solutions
+    @solutions ||= populate_cache
+  end
+
+  # I initially tried this up to 1 million, but it hosed my computer.
+  # So I am backing off to just solve for 100,000
+  #
+  # @private
+  #
+  # @return [Hash] All the solutions
+  def self.populate_cache
+    @solutions = {}
+    (0..100_000).each do |number|
+      @solutions[number] = solve_any_number(number)
+    end
+    @solutions
+  end
+
+  # Taking the same logic to solve the number that was used on the instance
+  #
+  # @private
+  #
+  # @return [String] The word that represents the number
+  def self.solve_any_number(number)
+    case number
+    when 0..19
+      NUMBER_TABLE[number]
+    when 20..99
+      tens, mod = number.divmod(10)
+      "#{TENS_TABLE[tens]}#{'-' + NUMBER_TABLE[mod] unless mod == 0}"
+    else
+      solve_large_number(number)
+    end
+  end
+
+  # We can remove the case statement if we know we are only dealing with large
+  # numbers
+  #
+  # @private
+  #
+  # @return [String] The word that represents the number
+  def self.solve_large_number(number)
+    UNIT_TABLE.each do |unit_num, unit_name|
+      div, mod = number.divmod(unit_num)
+      if div > 0
+        return "#{solve_with_cache(div)} #{unit_name}#{' ' + solve_with_cache(mod) unless mod == 0}"
+      end
+    end
+  end
+
+  # We can use this to lookup pre-solved solutions first, before doing the
+  # solve_large_number call again
+  #
+  # @private
+  #
+  # @return [String] The word that represents the number
+  def self.solve_with_cache(number)
+    solutions[number] || solve_large_number(number)
   end
 end
 
