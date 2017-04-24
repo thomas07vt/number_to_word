@@ -6,20 +6,18 @@ class NumberToWord
     1000000000 => 'billion',
     1000000 => 'million',
     1000 => 'thousand',
-    100 => 'hundred',
-    10 => 'tens',
-    1 => 'ones',
+    100 => 'hundred'
   }
 
   TENS_TABLE = {
-    90 => 'ninety',
-    80 => 'eighty',
-    70 => 'seventy',
-    60 => 'sixty',
-    50 => 'fifty',
-    40 => 'fourty',
-    30 => 'thirty',
-    20 => 'twenty',
+    9 => 'ninety',
+    8 => 'eighty',
+    7 => 'seventy',
+    6 => 'sixty',
+    5 => 'fifty',
+    4 => 'fourty',
+    3 => 'thirty',
+    2 => 'twenty',
   }
 
   NUMBER_TABLE = {
@@ -71,7 +69,24 @@ class NumberToWord
 
   private
 
-  def num_to_word(number, parts=[])
+  def num_to_word(number)
+    case number
+    when 0..19
+      NUMBER_TABLE[number]
+    when 20..99
+      tens, mod = number.divmod(10)
+      "#{TENS_TABLE[number / 10]}#{'-' + NUMBER_TABLE[mod] unless mod == 0}"
+    else
+      UNIT_TABLE.each do |unit_num, unit_name|
+        div, mod = number.divmod(unit_num)
+        if div > 0
+          return "#{num_to_word(div)} #{unit_name}#{' ' + num_to_word(mod) unless mod == 0}"
+        end
+      end
+    end
+  end
+
+  def first_solution(number, parts=[])
     UNIT_TABLE.each do |unit_num, unit_name|
       div, mod = number.divmod(unit_num)
 
