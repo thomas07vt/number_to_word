@@ -43,11 +43,12 @@ RSpec.describe NumberToWord do
       expect(subject.word).to be_a(String)
     end
 
-    # 0 - 9 are base words and 10-15 (14 is normal :) ) so lets tests those
-    # explicitly. I usually don't like to have more than one assertion per 'it'
-    # block, but if I did that, then I would be writing a lot more text that
-    # would probably make this test file harder to read
-    context '0-15' do
+    # 0 - 19 are base words that aren't easily tested programatically
+    # so lets tests those explicitly. I usually don't like to have more
+    # than one assertion per 'it' block, but if I did that, then I would
+    # be writing a lot more text that would probably make this test file
+    # harder to read
+    context '0-19' do
       it 'returns the correct word for the given integer' do
         expect(NumberToWord.new(0).word).to eq('zero')
         expect(NumberToWord.new(1).word).to eq('one')
@@ -65,51 +66,81 @@ RSpec.describe NumberToWord do
         expect(NumberToWord.new(13).word).to eq('thirteen')
         expect(NumberToWord.new(14).word).to eq('fourteen')
         expect(NumberToWord.new(15).word).to eq('fifteen')
+        expect(NumberToWord.new(16).word).to eq('sixteen')
+        expect(NumberToWord.new(17).word).to eq('seventeen')
+        expect(NumberToWord.new(18).word).to eq('eighteen')
+        expect(NumberToWord.new(19).word).to eq('nineteen')
       end
     end
 
-    # These teens can be programmatically tested, so we can still have full test
-    # coverage, assuming that the base number conversion is correct. We just
-    # check that the pattern is matched:
-    #
-    # e.g. 16
-    #   base = 6 #=> 'six',
-    #   unit = 'teen'
-    #
-    #   result = 'sixteen'
-    #
-    context '16-19' do
-      it 'returns teens correctly' do
-        (16..19).each do |number|
-          base = number - 10
+    context 'the rest of the 10s' do
+      it 'returns the appropriate word for the given 10s number' do
+        (20..99).each do |number|
+          # This will round to the nearest 10s
+          # e.g 29 will get converted to 20, 31 will get converted to 30
+          # #floor() isn't necessary in ruby 2.4, but it does make it more
+          # obvious what this line is doing
+          tens_unit = (number / 10).floor * 10
+          ones_unit = number - tens_unit
+          # This test isn't super explicit, but basically 20 - 99 is
+          # programatically verifyable, so I can actully test all these
+          # combinations instead of just picking random samples
+          tens_unit_word = NumberToWord.new(tens_unit).word
+          ones_unit_word = NumberToWord.new(ones_unit).word unless ones_unit == 0
           expect(NumberToWord.new(number).word).to \
-            eq("#{NumberToWord.new(base).word}teen")
+            eq([tens_unit_word, ones_unit_word].compact.join('-'))
+        end
+      end
+
+      # Since the tests above is programmatic, it would help to have a sanity
+      # check test or two, which will also get accross what the above test is 
+      # doing
+      context 'sanity checking' do
+        it 'returns 83 correctly' do
+          expect(NumberToWord.new(83).word).to eq('eighty-three')
+        end
+
+        it 'returns 27 correctly' do
+          expect(NumberToWord.new(27).word).to eq('twenty-seven')
         end
       end
     end
 
-    context '20s' do
-      it 'returns twenties correctly' do
-        expect(NumberToWord.new(20).word).to eq('twenty')
+    context '100s' do
+      it 'returns the appropriate word for the given 10s number' do
+        (100..999).each do |number|
+          hundreds_unit = (number / 100).floor * 100
+          tens_unit = number % 100
 
-        (21..29).each do |number|
-          base = number - 20
+          hundreds_unit_word = NumberToWord.new(hundreds_unit).word
+          tens_unit_word = NumberToWord.new(tens_unit).word unless tens_unit == 0
+
           expect(NumberToWord.new(number).word).to \
-            eq("twenty #{NumberToWord.new(base).word}")
+            eq([hundreds_unit_word, tens_unit_word].compact.join(' '))
+        end
+      end
+
+      context 'sanity checking' do
+        it 'returns 120 correctly' do
+          expect(NumberToWord.new(120).word).to eq('one hundred twenty')
+        end
+
+        it 'returns 999 correctly' do
+          expect(NumberToWord.new(999).word).to eq('nine hundred ninety-nine')
         end
       end
     end
 
-    context '30s' do
-      it 'returns thirties correctly' do
-        expect(NumberToWord.new(30).word).to eq('thirty')
+    context '1000s' do
+    end
 
-        (31..39).each do |number|
-          base = number - 30
-          expect(NumberToWord.new(number).word).to \
-            eq("thirty #{NumberToWord.new(base).word}")
-        end
-      end
+    context '10,000s' do
+    end
+
+    context '100,000s' do
+    end
+
+    context '1,000,000s' do
     end
   end
 end
