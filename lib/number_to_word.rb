@@ -2,12 +2,19 @@ require "number_to_word/version"
 
 class NumberToWord
   attr_reader :number
-  UNIT_TABLE = {
-    1000000000 => 'billion',
-    1000000 => 'million',
-    1000 => 'thousand',
-    100 => 'hundred'
-  }
+  #UNIT_TABLE = {
+    #1000000000 => 'billion',
+    #1000000 => 'million',
+    #1000 => 'thousand',
+    #100 => 'hundred'
+  #}
+
+  UNIT_TABLE = [
+    [1000000000, 'billion'],
+    [1000000, 'million'],
+    [1000, 'thousand'],
+    [100, 'hundred']
+  ]
 
   TENS_TABLE = {
     9 => 'ninety',
@@ -84,39 +91,6 @@ class NumberToWord
         end
       end
     end
-  end
-
-  def first_solution(number, parts=[])
-    UNIT_TABLE.each do |unit_num, unit_name|
-      div, mod = number.divmod(unit_num)
-
-      if div > 0
-        if unit_name == 'tens'
-          if div > 1
-            if mod == 0
-              parts << TENS_TABLE[number - mod]
-            else
-              parts << "#{TENS_TABLE[number - mod]}-"
-              num_to_word(mod, parts)
-            end
-          else
-            parts << NUMBER_TABLE[number]
-          end
-        elsif unit_name == 'ones'
-          parts << NUMBER_TABLE[number]
-        else
-          parts << num_to_word(div)
-          parts << ' '
-          parts << unit_name
-          parts << ' '
-          num_to_word(mod, parts)
-        end
-
-        break
-      end
-    end
-
-    parts.compact.join('').strip
   end
 end
 
