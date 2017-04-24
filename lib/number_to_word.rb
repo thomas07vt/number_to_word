@@ -49,18 +49,18 @@ class NumberToWord
   #
   # @return [Hash] All the solutions
   def self.solutions
-    @solutions ||= solve_for_most
+    @solutions ||= populate_cache
   end
 
   # I initially tried this up to 1 million, but it hosed my computer.
   # So I am backing off to just solve for 100,000
   # @private
-  def self.solve_for_most
-    solutions = {}
+  def self.populate_cache
+    @solutions = {}
     (0..100_000).each do |number|
-      solutions[number] = solve_any_number(number)
+      @solutions[number] = solve_any_number(number)
     end
-    solutions
+    @solutions
   end
 
   # Taking the same logic to solve the number that was used on the instance
@@ -74,12 +74,7 @@ class NumberToWord
       tens, mod = number.divmod(10)
       "#{TENS_TABLE[number / 10]}#{'-' + NUMBER_TABLE[mod] unless mod == 0}"
     else
-      UNIT_TABLE.each do |unit_num, unit_name|
-        div, mod = number.divmod(unit_num)
-        if div > 0
-          return "#{solve_any_number(div)} #{unit_name}#{' ' + solve_any_number(mod) unless mod == 0}"
-        end
-      end
+      solve_large_number(number)
     end
   end
 
@@ -87,7 +82,7 @@ class NumberToWord
   # solve_large_number call again
   #
   # @private
-  def self.solve(number)
+  def self.solve_with_cache(number)
     solutions[number] || solve_large_number(number)
   end
 
@@ -97,7 +92,7 @@ class NumberToWord
     UNIT_TABLE.each do |unit_num, unit_name|
       div, mod = number.divmod(unit_num)
       if div > 0
-        return "#{solve(div)} #{unit_name}#{' ' + solve(mod) unless mod == 0}"
+        return "#{solve_with_cache(div)} #{unit_name}#{' ' + solve_with_cache(mod) unless mod == 0}"
       end
     end
   end
