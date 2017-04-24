@@ -88,7 +88,7 @@ RSpec.describe NumberToWord do
           tens_unit_word = NumberToWord.new(tens_unit).word
           ones_unit_word = NumberToWord.new(ones_unit).word unless ones_unit == 0
           expect(NumberToWord.new(number).word).to \
-            eq([tens_unit_word, ones_unit_word].compact.join(' '))
+            eq([tens_unit_word, ones_unit_word].compact.join('-'))
         end
       end
 
@@ -97,11 +97,11 @@ RSpec.describe NumberToWord do
       # doing
       context 'sanity checking' do
         it 'returns 83 correctly' do
-          expect(NumberToWord.new(83).word).to eq('eighty three')
+          expect(NumberToWord.new(83).word).to eq('eighty-three')
         end
 
         it 'returns 27 correctly' do
-          expect(NumberToWord.new(27).word).to eq('twenty seven')
+          expect(NumberToWord.new(27).word).to eq('twenty-seven')
         end
       end
     end
@@ -110,13 +110,13 @@ RSpec.describe NumberToWord do
       it 'returns the appropriate word for the given 10s number' do
         (100..999).each do |number|
           hundreds_unit = (number / 100).floor * 100
-          ones_unit = number - hundreds_unit
+          tens_unit = number % 100
 
           hundreds_unit_word = NumberToWord.new(hundreds_unit).word
-          ones_unit_word = NumberToWord.new(ones_unit).word unless ones_unit == 0
+          tens_unit_word = NumberToWord.new(tens_unit).word unless tens_unit == 0
 
           expect(NumberToWord.new(number).word).to \
-            eq([tens_unit_word, ones_unit_word].compact.join(' '))
+            eq([hundreds_unit_word, tens_unit_word].compact.join(' '))
         end
       end
 
