@@ -106,17 +106,31 @@ RSpec.describe NumberToWord do
       end
     end
 
-    context '100s' do
-      it 'returns the appropriate word for the given 10s number' do
-        (100..999).each do |number|
-          hundreds_unit = (number / 100).floor * 100
-          tens_unit = number % 100
+    # This takes a little while to run. Realistically we woudn't run this test
+    # every time, just on some ci/cd machine. We could go up to 1 billion but
+    # that would take a really long time to run, so I am not going to do it :)
+    #
+    # This test assumes that all numbers under 100 are returning correctly.
+    # Since we have tests above, we can be sure of that. Having tests depend on
+    # other tests isn't great, but for some reason I really want to test very
+    # number up to 1 million
+    context '100 - 1_000_000' do
+      it 'returns the appropriate word for the given 100 - 1_000_000' do
+        # We will loop though each unit stage and test all of them between
+        # the current unit and next unit
+        units = [100, 1000, 1_000_000]
+        while units.length > 1 do
+          unit = units.shift
+          (unit...units[0]).each do |number|
+            unit_specific = (number / unit).floor * unit
+            remainder = number % unit
 
-          hundreds_unit_word = NumberToWord.new(hundreds_unit).word
-          tens_unit_word = NumberToWord.new(tens_unit).word unless tens_unit == 0
+            unit_word = NumberToWord.new(unit_specific).word
+            remainder_word = NumberToWord.new(remainder).word unless remainder == 0
 
-          expect(NumberToWord.new(number).word).to \
-            eq([hundreds_unit_word, tens_unit_word].compact.join(' '))
+            expect(NumberToWord.new(number).word).to \
+              eq([unit_word, remainder_word].compact.join(' '))
+          end
         end
       end
 
@@ -128,19 +142,13 @@ RSpec.describe NumberToWord do
         it 'returns 999 correctly' do
           expect(NumberToWord.new(999).word).to eq('nine hundred ninety-nine')
         end
+
+        # I want to make sure we test some numbers between 1 milion and 1 billion
+        it 'returns 985_723_146 correctly' do
+          expect(NumberToWord.new(985_723_146).word).to \
+            eq('nine hundred eighty-five million seven hundred twenty-three thousand one hundred fourty-six')
+        end
       end
-    end
-
-    context '1000s' do
-    end
-
-    context '10,000s' do
-    end
-
-    context '100,000s' do
-    end
-
-    context '1,000,000s' do
     end
   end
 end
