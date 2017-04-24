@@ -105,6 +105,43 @@ RSpec.describe NumberToWord do
         end
       end
     end
+
+    context '100s' do
+      it 'returns the appropriate word for the given 10s number' do
+        (100..999).each do |number|
+          hundreds_unit = (number / 100).floor * 100
+          ones_unit = number - hundreds_unit
+
+          hundreds_unit_word = NumberToWord.new(hundreds_unit).word
+          ones_unit_word = NumberToWord.new(ones_unit).word unless ones_unit == 0
+
+          expect(NumberToWord.new(number).word).to \
+            eq([tens_unit_word, ones_unit_word].compact.join(' '))
+        end
+      end
+
+      context 'sanity checking' do
+        it 'returns 120 correctly' do
+          expect(NumberToWord.new(120).word).to eq('one hundred twenty')
+        end
+
+        it 'returns 999 correctly' do
+          expect(NumberToWord.new(999).word).to eq('nine hundred ninety-nine')
+        end
+      end
+    end
+
+    context '1000s' do
+    end
+
+    context '10,000s' do
+    end
+
+    context '100,000s' do
+    end
+
+    context '1,000,000s' do
+    end
   end
 end
 
