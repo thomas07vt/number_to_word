@@ -3,13 +3,6 @@ require "number_to_word/version"
 class NumberToWord
   attr_reader :number
   UNIT_TABLE = [
-    '',
-    'thousand',
-    'million',
-    'billion'
-  ]
-
-  NUM_UNIT_TABLE = [
     [1000000000, 'billion'],
     [1000000, 'million'],
     [1000, 'thousand'],
@@ -64,7 +57,7 @@ class NumberToWord
   # @private
   def self.populate_cache
     @solutions = {}
-    (0..999).each do |number|
+    (0..100_000).each do |number|
       @solutions[number] = solve_any_number(number)
     end
     @solutions
@@ -96,7 +89,7 @@ class NumberToWord
   # We can remove the case statement if we know we are only dealing with large
   # numbers
   def self.solve_large_number(number)
-    NUM_UNIT_TABLE.each do |unit_num, unit_name|
+    UNIT_TABLE.each do |unit_num, unit_name|
       div, mod = number.divmod(unit_num)
       if div > 0
         return "#{solve_with_cache(div)} #{unit_name}#{' ' + solve_with_cache(mod) unless mod == 0}"
@@ -124,14 +117,8 @@ class NumberToWord
   # @return [String] The resulting word
   def word
     return 'zero' if @number == 0
-    return NumberToWord.solutions[@number] if @number <= 999
 
-    words = []
-    @number.to_s.reverse.scan(/.{1,3}/).each_with_index do |numbers, index|
-      words << "#{NumberToWord.solutions[numbers.reverse.to_i]} #{UNIT_TABLE[index]}"
-    end
-
-    words.reverse.join(' ').strip
+    NumberToWord.solutions[@number] || NumberToWord.solve_large_number(@number)
   end
 end
 
