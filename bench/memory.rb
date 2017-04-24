@@ -26,6 +26,7 @@ def millions
 end
 
 Benchmark.memory do |x|
+  x.report("preload")          { NumberToWord.solutions }
   x.report("zero")          { zero }
   x.report("single_digit")  { single_digit }
   x.report("tens")          { tens }
